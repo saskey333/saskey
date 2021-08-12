@@ -1,0 +1,336 @@
+.container {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    background: #FFFFFF;
+}
+
+/* Rectangle 2 */
+
+.card1 {
+    position: absolute;
+    width: 184px;
+    height: 278px;
+    left: 544px;
+    top: 178px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;
+    cursor: pointer;
+}
+
+/* Rectangle 3 */
+
+.card2 {
+    position: absolute;
+    width: 185px;
+    height: 278px;
+    left: 526px;
+    top: 228px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;
+    cursor: pointer;
+}
+
+/* Rectangle 5 */
+
+.card5 {
+    position: absolute;
+    width: 185px;
+    height: 278px;
+    left: 526px;
+    top: 263px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;
+    cursor: pointer;
+}
+
+/* Rectangle 4 */
+
+.card4 {
+    position: absolute;
+    width: 185px;
+    height: 278px;
+    left: 553px;
+    top: 248px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;    
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;  
+    cursor: pointer;                                                                  
+}
+
+/* Rectangle 3 */
+
+.card3 {
+    position: absolute;
+    width: 185px;
+    height: 278px;
+    left: 526px;
+    top: 228px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;
+    cursor: pointer;
+}
+
+
+/* Rectangle 22 */
+.card11 {
+    position: absolute;
+    width: 184px;
+    height: 278px;
+    left: 102px;
+    top: 221px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;
+    cursor: pointer;
+}
+
+/* Rectangle 33 */
+
+.card22 {
+    position: absolute;
+    width: 185px;
+    height: 278px;
+    left: 324px;
+    top: 221px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;
+    cursor: pointer;
+}
+
+/* Rectangle 44 */
+
+.card33 {
+    position: absolute;
+    width: 185px;
+    height: 278px;
+    left: 547px;
+    top: 221px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;
+    cursor: pointer;
+}
+
+ /* Rectangle 55 */
+
+.card44 {
+    position: absolute;
+    width: 185px;
+    height: 278px;
+    left: 770px;
+    top: 221px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;
+    cursor: pointer;
+}
+
+/* Rectangle 1 */
+
+.card55 {
+    position: absolute;
+    width: 184px;
+    height: 278px;
+    left: 993px;
+    top: 221px;
+    background: #192328;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    font-size: 60px;
+    font-weight: bold;
+    justify-content: center;
+    line-height: 270px;
+    cursor: pointer;
+}
+
+.card111 {
+    position: absolute;
+    width: 184px;
+    height: 278px;
+    left: 102px;
+    top: 221px;
+    background: #fbfcfd;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    display: block;
+    padding: 10px;
+    display: none;
+}
+
+.card222 {
+    position: absolute;
+    width: 184px;
+    height: 278px;
+    left: 324px;
+    top: 221px;
+    background: #fbfcfd;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    display: block;
+    padding: 10px;
+}
+
+.card333 {
+    position: absolute;
+    width: 184px;
+    height: 278px;
+    left: 102px;
+    top: 221px;
+    background: #fbfcfd;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    display: block;
+    padding: 10px;
+}
+
+.card444 {
+    position: absolute;
+    width: 184px;
+    height: 278px;
+    left: 770px;
+    top: 221px;
+    background: #fbfcfd;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    display: block;
+    padding: 10px;
+}
+
+.card555 {
+    position: absolute;
+    width: 184px;
+    height: 278px;
+    left: 993px;
+    top: 221px;
+    background: #fbfcfd;
+    border: 5px solid #FF002E;
+    box-sizing: border-box;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    display: block;
+    padding: 10px;
+}
+
+span {
+    margin-top: 5px;
+}
+
+b {
+    font-size: 20px;
+}
+
+@keyframes example {
+    0%   {background-color: #192328; transform: rotateY(30deg)}
+    25%  {background-color: #3a3d3f;  transform: rotateY(70deg)}
+    50%  {background-color: #a2a6a8;  transform: rotateY(120deg)}
+    75%  {background-color:rgb(255, 255, 255); transform: rotateY(150deg);}
+    100% {background-color:rgb(255, 255, 255); transform: rotateY(180deg);}
+}
+
+@keyframes example1 {
+    0%   {background-color:rgb(255, 255, 255); transform: rotateY(180deg);}
+    25%  {background-color:rgb(255, 255, 255); transform: rotateY(150deg);}
+    50%  {background-color: #a2a6a8;  transform: rotateY(120deg)}
+    75%  {background-color: #3a3d3f;  transform: rotateY(70deg)}
+    100% {background-color: #192328; transform: rotateY(30deg)}
+}
+
+
+
+
+

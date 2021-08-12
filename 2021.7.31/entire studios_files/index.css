@@ -1,0 +1,21 @@
+@charset "UTF-8";
+
+@font-face {
+  font-family: 'spacemono';
+  src: url('../fonts/SpaceMono-Regular.woff2') format('woff2'),
+       url('../fonts/SpaceMono-Regular.woff') format('woff'),
+       url('../fonts/SpaceMono-Regular.ttf') format('truetype');
+  font-display: block;
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'klein';
+  src: url('../fonts/klein-text-medium.woff2') format('woff2'),
+       url('../fonts/klein-text-medium.woff') format('woff'),
+       url('../fonts/klein-text-medium.ttf') format('truetype');
+  font-display: block;
+  font-weight: normal;
+  font-style: normal;
+}

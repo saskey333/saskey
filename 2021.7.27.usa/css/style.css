@@ -1,0 +1,107 @@
+nav {
+    display: block !important;
+    margin-left: 5px;
+}
+
+.md-color {
+    color: rgb(43, 241, 248) !important;
+    font-size: .8em !important;
+    font-weight: normal;
+} 
+
+.bold {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.collapse {
+    justify-content: space-between;
+    /* margin-right: 10px; */
+}
+
+.navbar-toggler {
+    color: rgb(39, 39, 39) !important;
+    /* font-size: 1rem !important; */
+}
+
+.fs-30 {
+    font-size: 30px;
+}
+
+.search-top {
+    display: none;
+    float: right;
+    margin-top: 15px;
+    /* margin-right: 20px; */
+}
+
+@media screen and (max-width: 770px) {
+    .search-top {
+        display: flex;
+    }
+    .search {
+        display: none;
+    }
+    .contentf {
+        display: none;
+    }
+    .contents {
+        display: none;
+    }
+    .main {
+        padding-top: 10vh !important;
+    }
+}
+
+@media screen and (max-width: 330px) {
+    body {
+        min-width: 330px;
+        overflow-x: scroll;
+    }
+}
+
+.main {
+    background: repeat url("../img/wood.png");
+    border: 1px solid white;
+    border-radius: 5px;
+    color: white;
+    display: block;
+    height: 30vh;
+    padding-top: 5%;
+    text-align: center;
+    width: 100%;
+}
+
+.main h1 {
+    font-size: 35px;
+}
+
+.contentf {
+    font-size: 20px;
+    margin: auto;
+    width: 80%;
+}
+
+.contents {
+    font-size: 20px;
+    margin: 1% auto;
+    width: 100%;
+}
+
+.list {
+    margin-top: 20px;
+    width: 80%;
+}
+
+.img {
+    border: 1px solid white;
+    border-radius: 10px;
+    height: 300px;
+    width: 280px;
+}
+
+.asdf {
+    background-color: yellow;
+    height: 100px;
+}

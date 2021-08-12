@@ -1,0 +1,82 @@
+.header {
+    background-color: rgb(35, 175, 240);
+    border-bottom: solid 3px rgb(79, 111, 253);
+    box-shadow: 1px 1px cadetblue;
+    display: flex;
+    height: 8vh;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.logo {
+    color: white;
+    display: flex;
+    line-height: 8vh;
+    margin-top: 5px;
+    margin-left: 80px;
+    text-shadow: 4px 4px 6px #000000;
+}
+
+.header-url {
+    margin-top: 20px;
+    margin-right: 100px;
+}
+
+.row {
+    height: 90%;
+}
+
+.result {
+    background-color: rgb(214, 227, 235);
+    height: 100%;
+    overflow-y: auto;
+}
+
+.addTags {
+    border: solid 1px rgb(94, 89, 89);
+    border-radius: 5px;
+    height: 50vh;
+    margin-top: 200px;
+    width: 100%;
+}
+
+.addInput {
+    width: 80%;
+    margin: 100px auto;
+}
+
+.addBtn {
+    width: 80%;
+    margin: 100px 45%;
+}
+
+.listDel {
+    cursor: pointer;
+    float: right;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.resultList {
+    margin: 100px 0;
+}
+
+@media only screen and (max-width: 500px)  {
+    .logo {
+        display: none;
+    }
+    .header-url {
+        margin-top: 20px;
+        margin-right: 0;
+    }
+}
+
+@media only screen and (max-width: 580px)  {
+    .result {
+        overflow-y: scroll;
+    }
+    .resultList {
+        margin: 0 0;
+    }
+}
+

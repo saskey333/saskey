@@ -1,0 +1,59 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>test</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+    <body>
+        <div class="header">
+            <div class="logo">
+                <h1>Logo</h1>
+            </div>
+            <div class="header-url">
+                <input type="text" class="form-control" id="usr" value="#tag=red,blue,purple" disabled/>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4 result">
+                    <ul class="list-group resultList">
+                        <li class="list-group-item list-group-item-action">
+                            red
+                            <span class="badge badge-primary badge-pill listDel">
+                                <i class="fa fa-trash " aria-hidden="true"></i>
+                            </span>
+                        </li>
+                        <li class="list-group-item list-group-item-action">
+                            blue
+                            <span class="badge badge-primary badge-pill listDel">
+                                <i class="fa fa-trash " aria-hidden="true"></i>
+                            </span>
+                        </li>
+                        <li class="list-group-item list-group-item-action">
+                            purple
+                            <span class="badge badge-primary badge-pill listDel">
+                                <i class="fa fa-trash " aria-hidden="true"></i>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-sm-1"></div>
+                <div class="col-sm-7">
+                    <div class="addTags">
+                        <div class="input-group mb-3 addInput">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text">#tags=</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="url">
+                        </div>
+                        <div class="addBtn">
+                            <button type="button" class="btn btn-primary ">ADD</button>
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
