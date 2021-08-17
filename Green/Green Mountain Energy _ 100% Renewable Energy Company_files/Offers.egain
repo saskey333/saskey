@@ -1,0 +1,61 @@
+
+
+
+
+
+
+	
+eGOFR={};
+eGOFR.Rules={};
+eGOFR.Conditions={},
+eGOFR.ConditionsSortedArray=new Array(),/*To loop through all conditions in order*/
+eGOFR.Banners={},
+eGOFR.Templates={};	
+eGOFR.INVITE_AUTO_CLOSE_INTERVAL = 60000;
+eGOFR.REOFFER_IGNORE_INTERVAL = 300000;
+eGOFR.REOFFER_ACCEPTED_INTERVAL = 300000;
+eGOFR.RETRY_SERVER_CHECK_INTERVAL = 120000;
+eGOFR.MAXIMUM_TIME_ON_PAGE_IN_MILLISECONDS = 7200000;
+eGOFR.SessionId = 58350586;
+eGOFR.ENABLE_TRACE_LOGGING = false;
+eGOFR.IS_OFFERS_LIMIT_PER_SESSION_ENABLE = 0;
+eGOFR.OFFERS_LIMIT_PER_SESSION = -1;
+eGOFR.PATCH_NO = "17.0.0.7.179917.0.35";
+eGOFR.OffersURL = document.getElementById("eGainOffers").src;
+eGOFR.OffersURL = eGOFR.OffersURL.substring(0, eGOFR.OffersURL.indexOf('/system/') + '/system/'.length);
+eGOFR.ServletURL = eGOFR.OffersURL + 'Offers.egain'
+eGOFR.EG_CUST_SEC = "true";
+
+eGOFR.addScriptElement = function(nm, scrURL)
+{
+	var elem = document.getElementById(nm);
+	if (elem)
+	{
+		/* this is required for single page offers support */
+		elem.parentNode.removeChild(elem);
+	}
+	var headRef = document.getElementsByTagName("head")[0];
+	el = document.createElement('script');
+	el.id = nm;
+	el.type = "text/javascript";
+	headRef.appendChild(el);
+	el.src =  eGOFR.OffersURL + scrURL;
+}
+eGOFR.setEgainCookie = function(name, value)
+{
+	document.cookie = name + "=" + escape(value) + (";path=/") + ((value === "true") ? ";secure" : "");
+}
+
+eGOFR.addScriptElement('egofrjs', "web/view/proactivesales/templates/egofrrulesengine.js?patch_no=17.0.0.7.179917.0.35");
+eGOFR.addScriptElement('egofrhookdefjs', "web/view/proactivesales/templates/egpsserviceshookdef.js?patch_no=17.0.0.7.179917.0.35");
+eGOFR.setEgainCookie('EG_CUST_SEC', eGOFR.EG_CUST_SEC);
+
+
+
+eGOFR.Rules['1113'] ={'rule_id':'1113','rule_label':'GME','rule_name':'GME+-+Homepage+-+7.30.2021+v2','bannerids':['1110'],'conjunction_op':'0','offertype_key':'1001','reoffer_on_reject':false,'is_max_reoffer_reject':false,'max_reoffer_reject':0,'reoffer_on_ignore':false,'is_max_reoffer_ignore':false,'max_reoffer_ignore':0,'reoffer_on_accept':false,'is_max_reoffer_accept':false,'max_reoffer_accept':0,'is_fixed':true,'is_not_counted_towards_limit':false,'is_offered_priority_chat':false,'service_type_key':'1001','action_type_name':'Chat Automatic','server_side_check':true,'contenturl_key':1042,'contenturl_name':'Green+Mountain+Energy+Home+Page','contenturl_label':'GME','design_context_id':'1137'};
+eGOFR.Conditions['1089'] ={'condition_key':'1089','condition_order':'0','condition_type':'1002','psales_rule_id':'1113','condition_operand':'','condition_operator':'>','condition_value':'30'};
+eGOFR.Banners['1110'] ={'banner_key':'1110','action_type_key':'1001','url':'https://greenmountain.egain.cloud/system/templates/chat/GME/index.html?entryPointId=1009&templateName=GME&ver=v11&locale=en-US&offercorrelationid=57601497&interactionid=15563825&aId=EG90608251&sId=B520ffa5f8-3486-4ca9-ae93-ece1f1964721&uId=C07f3abc3f-dcbe-45e8-af2e-a5007fe274f7&eglvrefname=&eglvPriorityChat=false&referer=https%3A%2F%2Fwww.greenmountainenergy.com%2F&','text':'<p align=\"center\">We\'re here if you have a question.</p>','style_key':'1004','z_index':'0','is_new_window':'1','template_keys':['1057'],'class_name':'egofr-top-right','window_left_position':0,'window_top_position':0,'window_height':0,'window_width':0,'ab_test_share':100,'psales_rule_id':1113};
+eGOFR.Templates['1057'] ={'template_key':'1057','innerhtml':'<div id = \"egofr-gmeGen05-container\" class=\"<styleclassname>\">  <div id = \"egofr-gmeGen05-content\">    <h1>Hello, there!<br />Anything we can do to help?</h1>    <bannertext>  </div>  <div class=\"egofr-gmeGen05-btnForm\">    <input type = \"button\" class = \"egofr-gmeGen05-btnCancel\" onclick = \"eGOFR.OnReject(eGOFR.REJECT_ACTION,<bannerid>    ,    <ruleid>    )\" Value = \"No, Thanks\">    <input type = \"button\" class = \"egofr-gmeGen05-btnOK\" onclick = \"eGOFR.OnAccept(<bannerid>    ,    <ruleid>    ,    <agentid>    )\" Value = \"Yes!\">    </div>  <div id = \"egofr-gmeGen05-footer\">&nbsp;</div></div','location':'gmeGen05','type':'1','internal_name':'gmeGen05','csspath':eGOFR.OffersURL+'offers/templates/gmeGen05/1120/css/egpsoffer.css'};eGOFR.IsMultipleOfferAllowed = false; 
+ if(typeof eGOFRPatternStore != 'undefined'){ eGOFRPatternStore("session" ,"https://www.greenmountainenergy.com/home-energy-solutions/products/centerpoint/$EGOFR$https://www.greenmountainenergy.com/home-energy-solutions/products/oncor/$EGOFR$https://www.greenmountainenergy.com/home-energy-solutions/products/tnmp/$EGOFR$https://www.greenmountainenergy.com/home-energy-solutions/products/aep-tnc/ $EGOFR$https://www.greenmountainenergy.com/home-energy-solutions/products/aep-tcc/$EGOFR$https://xoomenergy.com/en/cancel-account$EGOFR$https://xoomenergy.ca/en/cancel-account$EGOFR$https://stg1-www.discountpowertx.com/en_US/customercare$EGOFR$https://qa.cirroenergy.com/$EGOFR$https://www.greenmountainenergy.com/$EGOFR$https://www.mystream.com/en$EGOFR$https://www.mystream.com/en/enrollment/$EGOFR$https://www.reliant.com/en/public/choose-reliant-search-and-display-generic-v2.jsp$EGOFR$https://www.reliant.com/en/public/speak-and-save-24.jsp$EGOFR$https://www.reliant.com/protected/myAccount.htm$EGOFR$https://www.reliant.com/protected/swapproductchart.htm$EGOFR$https://www.reliant.com/protected/myplan.htm$EGOFR$https://www.reliant.com/protected/mybill.htm$EGOFR$https://www.reliant.com/protected/billing/viewPreviousBills.htm$EGOFR$https://www.reliant.com/protected/usageHistory.htm$EGOFR$https://prelive1-www.reliant.com/en/residential/save-energy/green-living/plans.jsp$EGOFR$https://www.reliant.com/public/processPosidRecheck.htm$EGOFR$https://www.reliant.com/public/getOffers.htm" ,"86400", "null")}
+
+

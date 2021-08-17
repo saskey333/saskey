@@ -1,0 +1,541 @@
+/*#######################################################################################
+	MARITZCX SITE INTERCEPT SCRIPT v1.6.x
+	Copyright (C) MaritzCX - All Rights Reserved
+	Unauthorized copying of this file, via any medium is strictly prohibited
+	Proprietary and confidential
+	Original Author Date: Aug 28, 2014
+	Last updated: mar 15, 2018 (Updated the notes on how the parameters work)
+	BUGFIX: Added try/catch statement to window.top.focus() after survey window opens.
+	
+	Parameters:
+	
+    surveyURL           The URL of the target survey.
+	showOnLoad			Whether the survey modal will show right away or wait until showModal is called.
+    invitationID        The CSS ID of the DOM element that will prompt the user to take the survey.
+    probability         The probability (percentage) determines the likelihood that the user will be prompted to take the survey.
+    width               The width (in pixels) of the pop-up.
+    height              The height (in pixels) of the pop-up.
+	cookieID			The unique identifier that will be added to the cookie. This is needed if you are implementing this script across multiple surveys.
+    expireDaysIfYes     The days that must pass before the user is eligible to take the survey again if they select to take the survey.
+    expireDaysIfNo      The days that must pass before the user is asked to take the survey again if they selected NOT to take the survey.
+    delay               How long the page will wait (in milliseconds) before asking to the user to take the survey.
+	waitUntilClose		Whether the survey will show right away, or wait until the current window has been closed.
+    placeholderURL     	This URL will be loaded in the background window as a place-holder prior to the survey. (waitUntilClose must be true.)
+	showInline			Whether the survey will be displayed on the page rather than a pop-up.
+    inlineID     		The ID of the container that will contain the survey IFrame.
+    inlineWrapperID     The ID of the wrapper that will be injected into the inlineID.
+    inlineCloseID       The ID of the close div that will be injected into the inlineID.
+    cleaseCookie        Should be false. Setting this to true will clear out any saved cookies relating to the display of the survey. Useful for testing.
+	debug				Determines whether or not debug messages will come up as the script runs. Should be set to false when everything is working. 
+	ignoreWarning		Determines whether to not console warnings will display if the script is set-up improperly. Should be false.
+    enabled				Determines whether to the survey should be enabled or not. Setting this option to false will stop the survey from ever popping up.
+    multiSurveys        Tells the script if there are multiple site intercept surveys being used on the site. *If true, use surveyList & domainChecker to
+                        specify which survey should be linked to which domain. The first domain listed in domainChecker will link to the first survey
+                        listed in surveyList, and the 2nd will link to the 2nd, etc...
+    pageVisit           The number of pages a user must visit on the site before the site intercept will be allowed to pop up.
+    mcxBlackList        A list of URLs where the site intercept will never pop up.
+    surveyList         	A list of different surveys to be used on different parts/domains of the site. This is used in conjunction with domainChecker.
+    domainChecker       A list of domains that link to the surveyList. The domain at index 0 of domainChecker will use the survey at index 0 of 
+                        surveyList, index 1 links to index 1, etc...
+    domainPath          This is used to specify a domain for the fatigue cookie that gets set. Generally this can be omitted from the parameters. 		
+    
+	
+#######################################################################################*/
+
+/*
+Paste the variable below (mcxSiteInterceptParameters) into your client extensibility. Change the parameters to suit your needs. 
+Any parameters left undefined will revert to their default values, as defined in the site intercept script file.
+Please note that the type for each parameter must match the type displayed in the comment after the parameter or it will revert to the default value.
+
+
+var mcxSiteInterceptParameters = {
+        surveyURL:                   undefined, //string
+        showOnLoad:                 undefined, //boolean
+        invitationID:             undefined, //string
+        probability:               undefined, //number (0 - 100 (%))
+        width:                           undefined, //number (px)
+        height:                         undefined, //number (px)
+        cookieID:                      undefined, //string
+        expireDaysIfYes:       undefined, //number (days)
+        expireDaysIfNo:         undefined, //number (days)
+        delay:                           undefined, //number (ms)
+        waitUntilClose:         undefined, //boolean
+        placeholderURL:         undefined, //string
+        showInline:                 undefined, //boolean
+        inlineID:                     undefined, //string
+        inlineWrapperID:       undefined, //string
+        inlineCloseID:           undefined, //string
+        cleanseCookie:            false, //boolean
+        debug:                            false, //boolean
+        ignoreWarning:            false, //boolean
+        enabled:                        true, //boolean
+        multiSurveys:              false, //boolean
+        pageVisit:                    1, //number
+        mcxBlackList:              [], //array
+        surveyList:                  [], //array
+        domainChecker:            [], //array
+        domainPath:                  "" //string
+}
+*/
+; (function (w) {
+	"use strict";
+	//Check to make sure custom parameters exist
+	if (typeof w.mcxSiteInterceptParameters === 'undefined') {
+		//Backward compatibility (for customers who have <v1.3)
+		if (typeof w.allegianceSiteInterceptParameters !== 'undefined') {
+			w.mcxSiteInterceptParameters = w.allegianceSiteInterceptParameters;
+			console.warn("The parameters variable (allegianceSiteInterceptParameters) needs to be renamed to mcxSiteInterceptParameters inside of the client extensibility. allegianceSiteInterceptParameters may be deprecated in future versions.");
+		} else {
+			console.warn("mcxSiteInterceptParameters undefined, ensure that it is defined in client extensibility and that the site intercept script is loaded in after the client extensibility script. Default parameters used.");
+			w.mcxSiteInterceptParameters = "";
+		}
+	}
+
+	var isArray = function () { return w.mcxSiteInterceptParameters && w.mcxSiteInterceptParameters.constructor === Array && w.mcxSiteInterceptParameters.length > 0; };
+	if (isArray()) {
+		var MCX_DEFAULT = 'MCX_DEFAULT';
+		var mcxUniqueID = w.mcxUniqueID || MCX_DEFAULT;
+		//Check over each item to see if a uniqueID matches
+		for (var i = 0; i < w.mcxSiteInterceptParameters.length; i++) {
+			if (w.mcxSiteInterceptParameters[i].uniqueID && mcxUniqueID == w.mcxSiteInterceptParameters[i].uniqueID) {
+				w.mcxSiteInterceptParameters = w.mcxSiteInterceptParameters[i];
+			}
+		}
+		//If no matches were found, attempt to assign default
+		if (isArray()) {
+			for (var j = 0; j < w.mcxSiteInterceptParameters.length; j++) {
+				if (w.mcxSiteInterceptParameters[j].uniqueID && MCX_DEFAULT == w.mcxSiteInterceptParameters[j].uniqueID) {
+					w.mcxSiteInterceptParameters = w.mcxSiteInterceptParameters[j];
+				}
+			}
+			//If no default was assigned, use the first item
+			if (isArray()) {
+				w.mcxSiteInterceptParameters = w.mcxSiteInterceptParameters[0];
+			}
+		}
+	}
+
+	var mcxPresetParam = w.mcxSiteInterceptParameters;
+
+	w.McxSiteInterceptOnExit = {
+		//Parameters used for customizing script
+		parameters: {
+			//Defaults
+			surveyURL: typeof mcxPresetParam.surveyURL === 'string' ? mcxPresetParam.surveyURL : "",
+			showOnLoad: typeof mcxPresetParam.showOnLoad === 'boolean' ? mcxPresetParam.showOnLoad : true,
+			invitationID: typeof mcxPresetParam.invitationID === 'string' ? mcxPresetParam.invitationID : "",
+			probability: typeof mcxPresetParam.probability === 'number' ? mcxPresetParam.probability : 100, //0 - 100%
+			width: typeof mcxPresetParam.width === 'number' ? mcxPresetParam.width : 550, //px
+			height: typeof mcxPresetParam.height === 'number' ? mcxPresetParam.height : 520, //px
+			cookieID: typeof mcxPresetParam.cookieID === 'string' ? mcxPresetParam.cookieID : "",
+			expireDaysIfYes: typeof mcxPresetParam.expireDaysIfYes === 'number' ? mcxPresetParam.expireDaysIfYes : 30, //days
+			expireDaysIfNo: typeof mcxPresetParam.expireDaysIfNo === 'number' ? mcxPresetParam.expireDaysIfNo : 30, //days
+			delay: typeof mcxPresetParam.delay === 'number' ? mcxPresetParam.delay : 0, //ms
+			waitUntilClose: typeof mcxPresetParam.waitUntilClose === 'boolean' ? mcxPresetParam.waitUntilClose : false,
+			placeholderURL: typeof mcxPresetParam.placeholderURL === 'string' ? mcxPresetParam.placeholderURL : "",
+			showInline: typeof mcxPresetParam.showInline === 'boolean' ? mcxPresetParam.showInline : false,
+			inlineID: typeof mcxPresetParam.inlineID === 'string' ? mcxPresetParam.inlineID : "mcxSurveyDialog",
+			inlineWrapperID: typeof mcxPresetParam.inlineWrapperID === 'string' ? mcxPresetParam.inlineWrapperID : "mcxSurveyWrapper",
+			inlineCloseID: typeof mcxPresetParam.inlineCloseID === 'string' ? mcxPresetParam.inlineCloseID : "mcxSurveyClose",
+			cleanseCookie: typeof mcxPresetParam.cleanseCookie === 'boolean' ? mcxPresetParam.cleanseCookie : false,
+			debug: typeof mcxPresetParam.debug === 'boolean' ? mcxPresetParam.debug : false,
+			ignoreWarning: typeof mcxPresetParam.ignoreWarning === 'boolean' ? mcxPresetParam.ignoreWarning : false,
+			enabled: typeof mcxPresetParam.enabled === 'boolean' ? mcxPresetParam.enabled : true,
+			multiSurveys: typeof mcxPresetParam.multiSurveys === 'boolean' ? mcxPresetParam.multiSurveys : false,
+			pageVisit: typeof mcxPresetParam.pageVisit === 'number' ? mcxPresetParam.pageVisit : 1,
+			mcxBlackList: typeof mcxPresetParam.mcxBlackList === 'object' ? mcxPresetParam.mcxBlackList : [],
+			surveyList: typeof mcxPresetParam.surveyList === 'object' ? mcxPresetParam.surveyList : [],
+			domainChecker: typeof mcxPresetParam.domainChecker === 'object' ? mcxPresetParam.domainChecker : [],
+			domainPath: typeof mcxPresetParam.domainPath === 'string' ? mcxPresetParam.domainPath : ""
+		},
+
+		takeSurvey: false, //Script-level variable, leave false.
+		surveyWindow: undefined, //Survey window, leave undefined.
+		surveyURLParams: undefined,
+		cachedHTML: undefined,
+
+		//Called when the page is loaded. Executes logic to determine whether to show the invitation or not.
+		onPageLoad: function () {
+			w.mcxLog('onPageLoad');
+			if (w.McxSiteInterceptOnExit.parameters.multiSurveys) {
+				w.mcxLog('Multiple surveys are being used.');
+				w.McxSiteInterceptOnExit.checkMultiSurveys();
+			}
+			w.McxSiteInterceptOnExit.cookieVisitCount();
+			if (w.McxSiteInterceptOnExit.parameters.uniqueID) { w.mcxLog('uniqueID: ' + w.McxSiteInterceptOnExit.parameters.uniqueID); }
+			w.McxSiteInterceptOnExit.surveyURLParams = sessionStorage["mcx.surveyURLParams"];
+			if (!w.McxSiteInterceptOnExit.surveyURLParams) { sessionStorage["mcx.surveyURLParams"] = '[{}]'; }
+			sessionStorage.mcxRandom = sessionStorage.mcxRandom || Math.floor(Math.random() * 100);
+			var rand = parseInt(sessionStorage.mcxRandom, 10)
+			if (w.McxSiteInterceptOnExit.parameters.probability < 1 && w.McxSiteInterceptOnExit.parameters.probability > 0) {
+				var decimal = w.McxSiteInterceptOnExit.parameters.probability;
+				w.McxSiteInterceptOnExit.parameters.probability = Math.floor(w.McxSiteInterceptOnExit.parameters.probability * 100);
+				w.mcxWarn('mcxSiteIntercept warning: The script detected a probability between 0 and 1. Probability should be a whole number between 0 and 100. The script has converted it to a whole number: ' + decimal + ' -> ' + w.McxSiteInterceptOnExit.parameters.probability);
+			}
+			if (w.McxSiteInterceptOnExit.parameters.probability <= 0) {
+				w.mcxWarn('mcxSiteIntercept warning: Probability it set to ' + w.McxSiteInterceptOnExit.parameters.probability + '. It must be greater than 0 to have any chance of displaying the survey.');
+			}
+
+			//Check if random number is less than probability (less than means probability met) and that survey is enabled
+			if (rand < w.McxSiteInterceptOnExit.parameters.probability && w.McxSiteInterceptOnExit.parameters.enabled && parseInt(w.McxSiteInterceptOnExit.RgetCookie('McxPageVisit')) >= w.McxSiteInterceptOnExit.parameters.pageVisit && w.McxSiteInterceptOnExit.McxBlackList() === false) {
+				//If no cookie exists, and showOnLoad is true, display the survey modal
+				if (!w.McxSiteInterceptOnExit.hasCookie() && w.McxSiteInterceptOnExit.parameters.showOnLoad) {
+					if (w.McxSiteInterceptOnExit.parameters.invitationID.length > 0) {
+						w.McxSiteInterceptOnExit.showModal();
+					} else {
+						w.mcxLog('delay ' + w.McxSiteInterceptOnExit.parameters.delay + ' ...');
+						w.setTimeout(function () {
+							w.mcxLog('... delay ');
+							w.McxSiteInterceptOnExit.popUp();
+						}, w.McxSiteInterceptOnExit.parameters.delay);
+					}
+				}
+			} else {
+				if (!w.McxSiteInterceptOnExit.parameters.enabled) {
+					w.mcxLog('Survey is disabled');
+				} else {
+					w.mcxLog('Probability fail. Chance to succeed: ' + w.McxSiteInterceptOnExit.parameters.probability + '%');
+				}
+			}
+		},
+		//Page visit count
+		cookieVisitCount: function () {
+			if (w.McxSiteInterceptOnExit.RgetCookie('McxPageVisit') == "") {
+				document.cookie = 'McxPageVisit=1';
+				document.cookie = 'path=/';
+				document.cookie = 'domain=' + (w.McxSiteInterceptOnExit.parameters.domainPath);
+			} else {
+				var pageVisit = parseInt(w.McxSiteInterceptOnExit.RgetCookie('McxPageVisit'));
+				document.cookie = 'McxPageVisit=' + (pageVisit + 1);
+				document.cookie = 'path=/';
+				document.cookie = 'domain=' + (w.McxSiteInterceptOnExit.parameters.domainPath);
+			}
+		},
+		RgetCookie: function (cname) {
+			var name = cname + "=";
+			var ca = document.cookie.split(';');
+			for (var i = 0; i < ca.length; i++) {
+				var c = ca[i];
+				while (c.charAt(0) == ' ') c = c.substring(1);
+				if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+			}
+			return "";
+		},
+		McxBlackList: function () {
+			var checkArray = w.McxSiteInterceptOnExit.parameters.mcxBlackList;
+			var aL = checkArray.length;
+			var curUrl = window.location.href;
+			for (var i = 0; i < aL; i++) {
+				var testEx = RegExp(checkArray[i]);
+				var finalCheck = testEx.test(curUrl);
+				if (finalCheck) { return true; }
+			}
+			return false;
+		},
+		//Function to add a parameter to URL
+		addUrlParameter: function (value, name) {
+			w.mcxLog('Added URL parameter: [' + value + ', ' + name + ']');
+			w.McxSiteInterceptOnExit.surveyURLParams = sessionStorage["mcx.surveyURLParams"];
+			var object = McxSiteInterceptOnExit.surveyURLParams ? JSON.parse(McxSiteInterceptOnExit.surveyURLParams) : [{}];
+			object[0][value] = name;
+			sessionStorage["mcx.surveyURLParams"] = JSON.stringify(object);
+			w.McxSiteInterceptOnExit.surveyURLParams = sessionStorage["mcx.surveyURLParams"];
+		},
+
+		//Function to remove a parameter from URL
+		removeUrlParameter: function (value) {
+			w.mcxLog('Removed URL parameter: [' + value + ']');
+			var object = JSON.parse(w.McxSiteInterceptOnExit.surveyURLParams);
+			delete object[0][value];
+			sessionStorage["mcx.surveyURLParams"] = JSON.stringify(object);
+			w.McxSiteInterceptOnExit.surveyURLParams = sessionStorage["mcx.surveyURLParams"];
+        },
+        
+        // Function that links different survey URLs to different domains/parts of a website
+		checkMultiSurveys: function () {
+			var curURL = window.location.href.toLowerCase();
+			if (w.McxSiteInterceptOnExit.parameters.domainChecker.length > 0) {
+				for (i = 0; i < w.McxSiteInterceptOnExit.parameters.domainChecker.length; i++) {
+					var reg = new RegExp(w.McxSiteInterceptOnExit.parameters.domainChecker[i]);
+					var domainCheck = reg.test(curURL);
+					if (domainCheck) {
+						w.McxSiteInterceptOnExit.parameters.surveyURL = w.McxSiteInterceptOnExit.parameters.surveyList[i];
+						break;
+					}
+				}
+			}
+		},
+
+		//Converts the URL parameters to a query string that will get appended to the survey URL
+		urlParametersToQueryString: function () {
+			w.mcxLog('urlParametersToQueryString ...');
+			if (w.McxSiteInterceptOnExit.surveyURLParams) {
+				var parameters = JSON.parse(w.McxSiteInterceptOnExit.surveyURLParams)[0];
+				var queryString = [];
+				for (var property in parameters) {
+					if (parameters.hasOwnProperty(property)) {
+						queryString.push(property + "=" + parameters[property]);
+					}
+				}
+				w.mcxLog('... urlParametersToQueryString ');
+				return "&" + queryString.join('&');
+			} else { return ""; }
+		},
+
+		//Creates a cookie with the given parameters
+		createCookie: function (name, value, days) {
+			w.mcxLog('createCookie: [' + name + ', ' + value + ', ' + days + ']');
+			var date = new Date();
+			date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+			w.docCookies.setItem(name, value, date);
+		},
+
+		hasCookie: function () {
+			var hasCookie = w.docCookies.hasItem('mcxSurveyQuarantine' + w.McxSiteInterceptOnExit.parameters.cookieID, w.McxSiteInterceptOnExit.parameters.cleanseCookie);
+			w.mcxLog('hasCookie: ' + 'mcxSurveyQuarantine' + w.McxSiteInterceptOnExit.parameters.cookieID + ': ' + hasCookie);
+			return hasCookie;
+		},
+
+		//Called when page is closed or domain is changed.
+		onPageClose: function () {
+			w.mcxLog('onPageClose');
+			if (w.McxSiteInterceptOnExit.parameters.enabled) {
+				try {
+					w.McxSiteInterceptOnExit.addUrlParameter("lastVisitedURL", encodeURIComponent(w.location.href));
+				} catch (err) {
+					w.mcxLog(err);
+				}
+				if (w.McxSiteInterceptOnExit.takeSurvey && w.McxSiteInterceptOnExit.surveyWindow && w.McxSiteInterceptOnExit.surveyWindow.opener && !w.McxSiteInterceptOnExit.surveyWindow.opener.closed) {
+					w.McxSiteInterceptOnExit.surveyWindow.location = (w.McxSiteInterceptOnExit.parameters.surveyURL + w.McxSiteInterceptOnExit.urlParametersToQueryString());
+				} else { return; }
+			}
+		},
+
+		//Brings up the survey
+		popUp: function () {
+			w.mcxLog('popUp');
+			if ((!w.McxSiteInterceptOnExit.hasCookie()) && w.McxSiteInterceptOnExit.parameters.enabled) {
+				var strWindowFeatures = "menubar=0,resizable=1,scrollbars=1,toolbar=0,status=1,width=" + w.McxSiteInterceptOnExit.parameters.width + ",height=" + w.McxSiteInterceptOnExit.parameters.height;
+				w.McxSiteInterceptOnExit.takeSurvey = true;
+				w.McxSiteInterceptOnExit.createCookie(
+					('mcxSurveyQuarantine' + w.McxSiteInterceptOnExit.parameters.cookieID),
+					('mcxSurveyQuarantine' + w.McxSiteInterceptOnExit.parameters.cookieID),
+
+					w.McxSiteInterceptOnExit.parameters.expireDaysIfYes);
+				var inv = document.getElementById(w.McxSiteInterceptOnExit.parameters.invitationID);
+				if (inv) { inv.style.display = 'none'; }
+				if (w.McxSiteInterceptOnExit.parameters.waitUntilClose) {
+					//Opens window and shows placeholderURL
+					w.McxSiteInterceptOnExit.surveyWindow = w.open(w.McxSiteInterceptOnExit.parameters.placeholderURL, "mcxWindow", strWindowFeatures);
+					w.McxSiteInterceptOnExit.surveyWindow.blur();
+					try{window.top.focus()}catch(e){};
+				} else {
+					//Logic for showing survey on the page rather than a separate window
+					if (w.McxSiteInterceptOnExit.parameters.showInline) {
+						var elem = document.getElementById(w.McxSiteInterceptOnExit.parameters.inlineID);
+						//Make sure elem exists on page, otherwise create a DIV with inlineID
+						if (!elem) {
+							elem = document.createElement('div');
+							elem.setAttribute("id", w.McxSiteInterceptOnExit.parameters.inlineID);
+							document.body.appendChild(elem);
+						}
+						//Preserve existing HTML
+						if (typeof w.McxSiteInterceptOnExit.cachedHTML === 'undefined') { w.McxSiteInterceptOnExit.cachedHTML = elem.innerHTML; }
+						//Inject additional required HTML and survey
+						elem.innerHTML = w.McxSiteInterceptOnExit.cachedHTML +
+							'<div id="' + w.McxSiteInterceptOnExit.parameters.inlineWrapperID + '">' +
+							'<div id="' + w.McxSiteInterceptOnExit.parameters.inlineCloseID + '"></div>' +
+							'<iframe frameborder="0" src="' + (w.McxSiteInterceptOnExit.parameters.surveyURL + w.McxSiteInterceptOnExit.urlParametersToQueryString()) +
+							'" width="' + w.McxSiteInterceptOnExit.parameters.width + '" height="' +
+							w.McxSiteInterceptOnExit.parameters.height + '"></iframe></div>';
+						elem.style.display = 'block';
+
+						//Event listener for closing the dialog
+						var el = document.getElementById(w.McxSiteInterceptOnExit.parameters.inlineCloseID);
+						if (el.addEventListener) { el.addEventListener("click", w.McxSiteInterceptOnExit.closeSurveyModal, false); }
+						else { el.attachEvent("onclick", w.McxSiteInterceptOnExit.closeSurveyModal); }
+					} else {
+						//Shows survey right away (if both waitUntilClose and showInline are false)
+						w.McxSiteInterceptOnExit.surveyWindow = w.open((w.McxSiteInterceptOnExit.parameters.surveyURL + w.McxSiteInterceptOnExit.urlParametersToQueryString()), "mcxWindow", strWindowFeatures);
+					}
+				}
+				w.focus();
+			}
+		},
+
+		//Hides modal
+		closeSurveyModal: function () {
+			w.mcxLog('closeSurveyModal');
+			document.getElementById(w.McxSiteInterceptOnExit.parameters.inlineID).style.display = 'none';
+		},
+		//Accepts the invitation.
+		acceptSurvey: function () {
+			w.mcxLog('acceptSurvey');
+			w.McxSiteInterceptOnExit.popUp();
+			// Allows for a custom callback function to be declared in client extensibility that fires off when the user accepts the survey
+			if (window.mcxAcceptSurveyCallback){
+				window.mcxAcceptSurveyCallback();
+			}
+		},
+
+		//Creates a quarantine cookie and hides the invitation.
+		declineSurvey: function () {
+			w.mcxLog('declineSurvey');
+			w.McxSiteInterceptOnExit.createCookie(
+				('mcxSurveyQuarantine' + w.McxSiteInterceptOnExit.parameters.cookieID),
+				('mcxSurveyQuarantine' + w.McxSiteInterceptOnExit.parameters.cookieID),
+				w.McxSiteInterceptOnExit.parameters.expireDaysIfNo);
+			document.getElementById(w.McxSiteInterceptOnExit.parameters.invitationID).style.display = 'none';
+			// Allows for a custom callback function to be declared in client extensibility that fires off when the user declines the survey
+			if (window.mcxDeclineSurveyCallback){
+				window.mcxDeclineSurveyCallback();
+			}
+		},
+
+		//Shows the invitation
+		showModal: function (delay) {
+			w.mcxLog('showModal ...');
+			if (w.McxSiteInterceptOnExit.parameters.enabled) {
+				if (!delay) { delay = w.McxSiteInterceptOnExit.parameters.delay; }
+				w.setTimeout(function () {
+					w.mcxLog('... showModal');
+					var invitation = document.getElementById(w.McxSiteInterceptOnExit.parameters.invitationID);
+					if (invitation) { 
+						invitation.style.display = 'block'; 
+						// Allows for a custom callback function to be declared in client Extensibility that fires off when the invitation shows for the user
+						if (window.mcxShowModalCallback){
+							window.mcxShowModalCallback();
+						}
+					}
+				}, delay);
+			}
+		},
+
+		addOnLoadEvent: function (func) {
+			var oldonload = w.onload;
+			if (typeof w.onload != 'function') {
+				w.onload = func;
+			} else {
+				w.onload = function () {
+					if (oldonload) { oldonload(); }
+					func();
+				};
+			}
+		},
+		addBeforeUnLoadEvent: function (func) {
+			var oldonload = w.onbeforeunload;
+			if (typeof w.onbeforeunload != 'function') {
+				w.onbeforeunload = func;
+			} else {
+				w.onbeforeunload = function () {
+					if (oldonload) { oldonload(); }
+					func();
+				};
+			}
+		},
+		addOnUnLoadEvent: function (func) {
+			var oldonload = w.onunload;
+			if (typeof w.onunload != 'function') {
+				w.onunload = func;
+			} else {
+				w.onunload = function () {
+					if (oldonload) { oldonload(); }
+					func();
+				};
+			}
+		}
+	};
+
+	w.docCookies = {
+		getBrowser: function () {
+			// Opera 8.0+
+			var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+			// Firefox 1.0+
+			var isFirefox = typeof InstallTrigger !== 'undefined';
+			// Safari 3.0+ "[object HTMLElementConstructor]"
+			var isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+			// Internet Explorer 6-11
+			var isIE = /*@cc_on!@*/false || !!document.documentMode;
+			// Edge 20+
+			var isEdge = !isIE && !!window.StyleMedia;
+			// Chrome 1+
+			var isChrome = !!window.chrome && !!window.chrome.webstore;
+			return {
+				isOpera: isOpera,
+				isFirefox: isFirefox,
+				isSafari: isSafari,
+				isIE: isIE,
+				isEdge: isEdge,
+				isChrome: isChrome
+			}
+		},
+		getItem: function (sKey) {
+			if (!sKey) { return null; }
+			return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
+		},
+		setItem: function (sKey, sValue, vEnd, sPath, sDomain, bSecure) {
+			if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) { return false; }
+			var sExpires = "";
+			if (vEnd) {
+				switch (vEnd.constructor) {
+					case Number:
+						sExpires = vEnd === Infinity ? "; expires=Fri, 31 Dec 9999 23:59:59 GMT" : "; max-age=" + vEnd;
+						break;
+					case String:
+						sExpires = "; expires=" + vEnd;
+						break;
+					case Date:
+						sExpires = "; expires=" + vEnd.toUTCString();
+						break;
+				}
+			}
+			var browser = this.getBrowser();
+			if (browser.isIE || browser.isEdge || !McxSiteInterceptOnExit.parameters.domainPath) {
+				w.mcxLog('Building cookie without domain. IE: ' + browser.isIE + '; Edge: ' + browser.isEdge + '; domainPath: not used(IE)', true);
+				document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + "; path=/";
+			} else {
+				w.mcxLog('Building cookie with domain. domainPath: ' + McxSiteInterceptOnExit.parameters.domainPath, true);
+				document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + "; domain=" + McxSiteInterceptOnExit.parameters.domainPath + "; path=/";
+			}
+			return true;
+		},
+		removeItem: function (sKey) {
+			if (!this.hasItem(sKey)) { return false; }
+			document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=" + McxSiteInterceptOnExit.parameters.domainPath + "; path=/";
+			return true;
+		},
+		hasItem: function (sKey, cleanseCookie) {
+			if (!sKey) { return false; }
+			if (cleanseCookie === true) {
+				this.removeItem(sKey);
+			}
+			return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+		},
+		keys: function () {
+			var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
+			for (var nLen = aKeys.length, nIdx = 0; nIdx < nLen; nIdx++) { aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]); }
+			return aKeys;
+		}
+	};
+
+	w.mcxWarn = function (warning, ignorePrefix) {
+		var consoleWarn = typeof console !== "undefined" && console.warn && w.McxSiteInterceptOnExit.parameters.ignoreWarning === false;
+		if (consoleWarn) {
+			var prefix = ignorePrefix ? '' : 'mcxSiteIntercept: ';
+			console.warn(prefix + warning);
+		}
+	};
+	w.mcxLog = function (log, ignorePrefix) {
+		var consoleLog = typeof console !== "undefined" && console.log && w.McxSiteInterceptOnExit.parameters.debug === true;
+		if (consoleLog) {
+			var prefix = ignorePrefix ? '' : 'mcxSiteIntercept: ';
+			console.log(prefix + log);
+		}
+	};
+
+	w.AllegianceSiteInterceptOnExit = w.McxSiteInterceptOnExit; //Backward compatibility (for customers who have <v1.3)
+	w.McxSiteInterceptOnExit.addOnUnLoadEvent(w.McxSiteInterceptOnExit.onPageClose); //ensures that other events are retained
+	w.McxSiteInterceptOnExit.addBeforeUnLoadEvent(w.McxSiteInterceptOnExit.onPageClose); //ensures that other events are retained
+	w.McxSiteInterceptOnExit.addOnLoadEvent(w.McxSiteInterceptOnExit.onPageLoad); //ensures that other events are retained
+	w.mcxLog("script loaded");
+}(this));

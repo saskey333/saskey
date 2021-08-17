@@ -1,0 +1,277 @@
+/********************** Site Intercept Code **********************/
+var mcxSiteInterceptParameters = {
+    surveyURL: "https://nrg.allegiancetech.com/cgi-bin/qwebcorporate.dll?idx=J79EN2",
+    showOnLoad: true,
+    invitationID: 'mcxInviteModal',
+    probability: 40,
+    width: 900,
+    height: 600,
+    expireDaysIfYes: 90,
+    expireDaysIfNo: 90,
+    delay: 3000,
+    waitUntilClose: true,
+    placeholderURL: 'https://siteintercept.allegiancetech.com/SurveyPlaceholder/gme_placeholder_page.html',
+    pageVisit: 2,
+    enabled: true
+}
+
+var urlsToAvoid = ['https://www.greenmountainenergy.com/for-home/shop-for-electricity/', 'https://www.greenmountainenergy.com/for-home/products/', 'https://www.greenmountainenergy.com/wp-gmec-landing/gmec-lnd-tx/tx-rtle/', 'https://www.greenmountainenergy.com/espanol/'];
+
+var ipsToAvoid = ['1.2.3.4.5']
+    /*['158.81.210.2', '158.81.210.230', '158.81.210.231', '158.81.210.232', '158.81.210.233', '158.81.210.234', '158.81.210.235', '158.81.210.236', '158.81.210.237', '158.81.210.238', '158.81.210.239', '158.81.208.2', '158.81.208.230', '158.81.208.231', '158.81.208.232', '158.81.208.233', '158.81.208.234', '158.81.208.235', '158.81.208.236', '158.81.208.237', '158.81.208.238', '158.81.208.239', '63.116.216.254', '158.81.191.1', '158.81.191.230', '158.81.191.231', '158.81.191.232', '158.81.191.233', '158.81.191.234', '158.81.191.235', '158.81.191.236', '158.81.191.237', '158.81.191.238', '158.81.191.239', '158.81.192.2', '158.81.192.230', '158.81.192.231', '158.81.192.232', '158.81.192.233', '158.81.192.234', '158.81.192.235', '158.81.192.236', '158.81.192.237', '158.81.192.238', '158.81.192.239']*/
+    ;
+
+var ipAddress;
+
+function getIpAddress() {
+    var request;
+
+    if (window.XMLHttpRequest) { // Mozilla, Safari, ...
+        request = new XMLHttpRequest();
+    } else if (window.ActiveXObject) { // IE
+        try {
+            request = new ActiveXObject('Msxml2.XMLHTTP');
+        } catch (e) {
+            try {
+                request = new ActiveXObject('Microsoft.XMLHTTP');
+            } catch (e) { }
+        }
+    }
+
+    request.onreadystatechange = function callback() {
+        if (request.readyState === 4 && request.status === 200) { // done
+            try {
+                window.res = request.responseText.match(/{(.*)}/)[0];
+                res = JSON.parse(res);
+                ipAddress = res.ip;
+            } catch (e) { }
+        }
+    };
+
+    //sync request is deprecated, but we use it here to avoid a timing issue 
+    request.open("GET", "https://api.ipify.org?format=jsonp", false);
+    request.send(null);
+}
+getIpAddress();
+
+function addContentSquareToSurvey() {
+    const getCookie = function getCookie(name) {
+        var match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+        if (match) {
+            return match[2];
+        } else {
+            return null;
+        }
+    };
+    //console.log("Is recording...");
+    var uxaGet = _uxa.push(["getSessionData"]);
+    if (uxaGet && uxaGet.projectId) {
+        var pid = uxaGet.projectId;
+        var uu = uxaGet.userId;
+        var sn = uxaGet.sessionNumber;
+        var pvid = uxaGet.pageNumber;
+        if (pid && uu && sn && pvid) {
+            sessionID = "https://app.contentsquare.com/quick-playback/index.html?pid=" + pid + "---uu=" + uu + "---sn=" + sn + "---pvid=" + pvid + "---recordingType=cs---vd=fs";
+            //console.log("The session ID URL is: " + sessionID);
+        }
+    } else {
+        var cs = getCookie("_cs_id") || null;
+        cs && (cs = cs.split("."));
+        sessionID = cs[0].substring(1);
+        //console.log("The session ID is: " + sessionID);
+    }
+    McxSiteInterceptOnExit.addUrlParameter("Content_Square", sessionID);
+}
+
+//Function that adds invite to the screen
+window.mcxAddModal = function () {
+
+    //Avoids adding the survey invite to the actual survey
+    if (window.location.href.match(/nrg\.allegiancetech/)) {
+        return;
+    }
+
+    // Avoid certain IP Addresses (sets probability to 0%)
+    if (ipAddress && ipsToAvoid.indexOf(ipAddress) > -1) {
+        mcxSiteInterceptParameters.probability = 0;
+    }
+
+    // Avoid certain URLs (sets probability to 0%)
+    var url = window.location.href;
+    for (var i = 0; i < urlsToAvoid.length; i++) {
+        var pattern = urlsToAvoid[i];
+        if (url.match(pattern)) {
+            mcxSiteInterceptParameters.probability = 0;
+        }
+    }
+
+    var screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+    //Create the invite modal, give it some innerHTML, add it to the DOM, then give it some CSS styles. 
+    var mcxInviteModal = document.createElement("div");
+    mcxInviteModal.setAttribute("id", "mcxInviteModal");
+    mcxInviteModal.innerHTML =
+        '<div id="mcx_invite_shadow">' +
+        '<div id="mcx_invite_div">' +
+        '<div id="mcx_invite_logo_container"><img id="mcx_invite_logo" src="https://nrg.allegiancetech.com/surveys/images/J79EN2/Preview/headerlogo.jpg?ts=20180129121431" alt="nrg logo" /></div>'
+
+        +
+        '<p id="mcx_invite_header">We\'d love your honest opinion.</p>'
+
+        +
+        '<div id="mcx_invite_p1">' +
+        '<p>Thanks for stopping by! After your visit, can you please answer a few questions about your experience? You’ll help us make our website even better.</p>' +
+        '</div>'
+
+        +
+        '<div id="mcx_invite_p2">' +
+        '<p>The survey is conducted by our friends at MaritzCX.</p>' +
+        '</div>'
+
+        +
+        '<div id="mcx_buttons">' +
+        '<div id="mcx_decline" onclick="McxSiteInterceptOnExit.declineSurvey()">No thanks</div>' +
+        '<div id="mcx_accept" onclick="addContentSquareToSurvey();McxSiteInterceptOnExit.acceptSurvey()">I\'m in</div>' +
+        '</div>'
+
+        +
+        '</div>' +
+        '</div>'
+
+    //creating modal DOM
+    document.body.insertBefore(mcxInviteModal, document.body.firstChild);
+
+    //CSS
+    //Reset all p tags in the invite to no margin, 1em font size, and 1em line-height
+    var pTags = document.getElementById('mcx_invite_div').querySelectorAll("p");
+    for (var i = 0; i < pTags.length; i++) {
+        pTags[i].style.cssText = "margin: 0px 0px; font-size: 1em; line-height: 1em;";
+    }
+    //gray modal background
+    document.getElementById("mcxInviteModal").style.cssText = 'width: 100%; height: 100vh; position: fixed; text-align: left; cursor: default; margin: 0; padding: 0; text-indent: 0; transition: all 0.8s; z-index: 9999; background: rgba(0, 0, 0, 0.3); display: none;';
+    //invite container
+    document.getElementById('mcx_invite_shadow').style.cssText = "width: 450px; min-height: 300px; padding: 10px 10px 10px 10px; border-radius: 5px; background: rgba(0, 0, 0, 0.5); position: absolute; left: calc(50% - 225px); top: calc(50% - 190px); box-sizing: border-box;";
+    document.getElementById('mcx_invite_div').style.cssText = "width: 430px; min-height: 280px; position: relative; font-weight: normal; background: #fff; color: black; border-radius: 1px; font-family: Calibri, Candara, Segoe, sans-serif; padding: 15px 15px 25px 15px; box-sizing: border-box;";
+    //logo and logo words
+    document.getElementById('mcx_invite_logo_container').style.cssText = "width: 100px; height: 65px;";
+    document.getElementById('mcx_invite_logo').style.cssText = "width: 115px; height: auto;";
+    // Main content
+    document.getElementById("mcx_invite_header").style.cssText = "position: relative; text-align: left; font-size: 20px; font-weight: bold; margin-bottom: 18px; margin-top: 12px;";
+    document.getElementById("mcx_invite_p1").style.cssText = "position: relative; text-align: left; margin-bottom: 18px; font-size: 14px; line-height: 18px;";
+    document.getElementById("mcx_invite_p2").style.cssText = "position: relative; text-align: left; margin-bottom: 20px; font-size: 14px;";
+    // Buttons
+    document.getElementById("mcx_buttons").style.cssText = "width: 400px; height: 40px; position: relative; margin: 0 auto;";
+    document.getElementById("mcx_decline").style.cssText = "width: 195px; height: 39px; line-height: 39px; font-size: 17px; background: #fff; position: absolute; left: 0px; top: 0px; cursor: pointer; font-weight: bold; text-align: center; box-shadow: 2px 2px 4px 1px #999; border-radius: 5px; border: 1px solid #bbb;";
+    document.getElementById("mcx_accept").style.cssText = "width: 195px; height: 40px; line-height: 40px; font-size: 17px; background: #f58e49; color: #fff; position: absolute; right: 0px; top: 0px; cursor: pointer; font-weight: bold; text-align: center; box-shadow: 2px 2px 4px 1px #999; border-radius: 5px;";
+
+    if (screenWidth < 750) {
+        document.getElementById('mcx_invite_shadow').style.transform = "scale(0.6)";
+    }
+
+}
+
+window.mcxAddModal();
+
+/***************************** Survey Only ****************************/
+
+function r(f) {
+    /in/.test(document.readyState) ? setTimeout('r(' + f + ')', 9) : f()
+}
+
+r(function () {
+    // Runs on MaritzCX survey      
+    if (window.jQuery && document.getElementById('canvas')) {
+
+        $(".nextButton").click(function () {
+            var csUrl = document.getElementById("Content_Square").value;
+            var csUrlNew = csUrl.replace(/---/g, "&");
+            document.getElementById("Content_Square").value = csUrlNew;
+            nextButtonClicked();
+        });
+
+        var cbGoogle2Houston = "Q00000060_text";
+        var cbGoogle2NY = "Q0000418C_text";
+
+        $(document).ready(function () {
+            setupSocial();
+        });
+
+        function setupSocial() {
+            $('#' + cbGoogle2Houston).html('<a class = "btnGoogle btnSocial" href = "Javascript:mcxPostGoogleHouston();">Google Review (Houston)</a>');
+            $('#' + cbGoogle2NY).html('<a class = "btnGoogle btnSocial" href = "Javascript:mcxPostGoogleNY();">Google Review (NYC)</a>');
+        }
+
+        window.mcxPostGoogleHouston = function () {
+            var strGoogle2Houston = 'https://search.google.com/local/writereview?placeid=ChIJtxusYW-_QIYRkq2Mt6E18F0';
+            $("#" + cbGoogle2Houston).attr('checked', true);
+            myWindow = window.open(strGoogle2Houston, '', 'width=1200,height=800')
+            myWindow.focus()
+        }
+        window.mcxPostGoogleNY = function () {
+            var strGoogle2NY = 'https://search.google.com/local/writereview?placeid=ChIJvU2mJqRZwokRjacJ3WmfKQI';
+            $("#" + cbGoogle2NY).attr('checked', true);
+            myWindow = window.open(strGoogle2NY, '', 'width=1200,height=800')
+            myWindow.focus()
+        }
+
+
+        var browser = getBrowser();
+        $("#Browser_Name").val(browser.name);
+
+        var screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        var deviceType = screenWidth > 815 ? 'Desktop' : 'Mobile';
+        $("#deviceType").val(deviceType);
+
+    }
+});
+
+function getBrowser() {
+    var ua = navigator.userAgent;
+
+    var isOpera = !!window.opera || ua.indexOf(' OPR/') >= 0; // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
+    var isEdge = ua.indexOf(' Edge') >= 0;
+    var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
+    var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0; // At least Safari 3+: "[object HTMLElementConstructor]"
+    if (!isSafari && navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
+        isSafari = true
+    }
+    var isChrome = !!window.chrome && !isOpera && !isEdge; // Chrome 1+
+    var isIE = /*@cc_on!@*/ false || !!document.documentMode; // At least IE6
+
+    var browser = {
+        name: '',
+        version: ''
+    }
+
+    if (isChrome) {
+        browser.name = "Chrome";
+        browser.version = ua.match(/Chrome\/(\d+)?./) ? ua.match(/Chrome\/(\d+)?./)[1] : '';
+    } else if (isIE) {
+        browser.name = "Internet Explorer";
+        if (ua.match(/rv:/)) {
+            browser.version = ua.match(/rv:(\d+)/) ? ua.match(/rv:(\d+)/)[1] : '';
+        } else if (ua.match(/MSIE /)) {
+            browser.version = ua.match(/MSIE (\d+)/i) ? ua.match(/MSIE (\d+)/i)[1] : '';
+        } else if (ua.match(/IE /)) {
+            browser.version = ua.match(/IE (\d+)/i) ? ua.match(/IE (\d+)/i)[1] : '';
+        }
+    } else if (isFirefox) {
+        browser.name = "Firefox";
+        browser.version = ua.match(/firefox\/(\d+)/i) ? ua.match(/firefox\/(\d+)/i)[1] : '';
+    } else if (isSafari) {
+        browser.name = "Safari";
+        browser.version = ua.match(/version\/(\d+)/i) ? ua.match(/version\/(\d+)/i)[1] : '';
+    } else if (isEdge) {
+        browser.name = "Edge";
+        browser.version = ua.match(/edge\/(\d+)/i) ? ua.match(/edge\/(\d+)/i)[1] : '';
+    } else if (isOpera) {
+        browser.name = "Opera";
+        if (ua.match(/OPR/i)) {
+            browser.version = ua.match(/opr\/(\d+)/i) ? ua.match(/opr\/(\d+)/i)[1] : '';
+        } else if (ua.match(/opera/i)) {
+            browser.version = ua.match(/opera\/(\d+)/i) ? ua.match(/opera\/(\d+)/i)[1] : '';
+        }
+    }
+
+    return browser;
+}

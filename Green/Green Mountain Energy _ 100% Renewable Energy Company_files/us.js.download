@@ -1,0 +1,1 @@
+"use strict";if(window.mbsy&&window.mbsy.uid){var uidScript=document.createElement("script");uidScript.src="https://cdn.getambassador.com/us-"+window.mbsy.uid+".js",uidScript.async=!0,document.getElementsByTagName("head")[0].appendChild(uidScript)}
